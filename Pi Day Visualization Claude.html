@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dan broja π — 14. mart</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,900;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080d14;
+    --accent: #5bc4f5;
+    --accent2: #f5904a;
+    --text: #e8f4ff;
+    --dim: #7a9ab8;
+    --card: #0d1825;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Floating pi digits in background */
+  #bg-digits {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-digit {
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    color: rgba(91, 196, 245, 0.05);
+    font-size: clamp(20px, 4vw, 60px);
+    animation: floatUp linear infinite;
+    user-select: none;
+  }
+  @keyframes floatUp {
+    from { transform: translateY(110vh) rotate(var(--rot)); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    to   { transform: translateY(-10vh) rotate(var(--rot)); opacity: 0; }
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 4rem 0 3rem;
+  }
+  .pi-symbol {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(80px, 18vw, 180px);
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 80px rgba(232,197,71,0.3), 0 0 160px rgba(232,197,71,0.1);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { text-shadow: 0 0 80px rgba(232,197,71,0.3), 0 0 160px rgba(232,197,71,0.1); }
+    50%      { text-shadow: 0 0 120px rgba(232,197,71,0.6), 0 0 200px rgba(232,197,71,0.25); }
+  }
+  .date-tag {
+    display: inline-block;
+    background: var(--accent2);
+    color: #fff;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    padding: 0.3rem 1rem;
+    margin: 0.5rem 0;
+    text-transform: uppercase;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-top: 0.5rem;
+  }
+  header p {
+    color: var(--dim);
+    font-size: 0.78rem;
+    margin-top: 0.6rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* DIGITS STRIP */
+  .digits-strip {
+    background: var(--card);
+    border: 1px solid #1e1d28;
+    border-radius: 4px;
+    padding: 1.2rem;
+    margin: 2rem 0;
+    overflow: hidden;
+  }
+  .digits-strip-label {
+    font-size: 0.65rem;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  #digits-display {
+    font-size: clamp(0.75rem, 1.8vw, 1rem);
+    line-height: 2;
+    word-break: break-all;
+    color: var(--dim);
+  }
+  #digits-display span.hi {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  #digits-display span.hi2 {
+    color: var(--accent2);
+  }
+
+  /* SECTIONS */
+  section {
+    margin: 2.5rem 0;
+  }
+  section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #1e1d28;
+    padding-bottom: 0.5rem;
+  }
+
+  /* LEIBNIZ APPROXIMATION */
+  .approx-box {
+    background: var(--card);
+    border: 1px solid #1e1d28;
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .approx-box p {
+    font-size: 0.8rem;
+    color: var(--dim);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .formula {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-align: center;
+    margin: 1rem 0;
+    letter-spacing: 0.05em;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  input[type=range] {
+    flex: 1;
+    min-width: 120px;
+    accent-color: var(--accent);
+  }
+  .pi-result {
+    font-size: 1.3rem;
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 180px;
+    text-align: right;
+  }
+  .error-display {
+    font-size: 0.7rem;
+    color: var(--dim);
+    margin-top: 0.3rem;
+    text-align: right;
+  }
+  .iter-label {
+    font-size: 0.7rem;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  /* MONTE CARLO */
+  .mc-wrapper {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  @media (max-width: 600px) { .mc-wrapper { grid-template-columns: 1fr; } }
+  canvas#mc {
+    border: 1px solid #1e1d28;
+    border-radius: 4px;
+    display: block;
+    background: #0d0c16;
+  }
+  .mc-info {
+    font-size: 0.78rem;
+    color: var(--dim);
+    line-height: 1.9;
+  }
+  .mc-info strong {
+    color: var(--text);
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .mc-pi-val {
+    font-size: 1.8rem;
+    color: var(--accent);
+    font-weight: 700;
+    display: block;
+    margin: 0.5rem 0;
+    font-family: 'Playfair Display', serif;
+  }
+  .dot-in  { fill: var(--accent); }
+  .dot-out { fill: var(--accent2); }
+
+  .btn {
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    margin-top: 0.8rem;
+  }
+  .btn:hover { background: var(--accent); color: var(--bg); }
+
+  /* WALLIS / FORMULA TABLE */
+  .formula-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  .formula-table td, .formula-table th {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #1a192a;
+    vertical-align: middle;
+  }
+  .formula-table th {
+    color: var(--dim);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+  }
+  .formula-table td:first-child {
+    color: var(--accent);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1rem;
+  }
+  .formula-table td:last-child { color: var(--dim); }
+
+  /* SEARCH DIGIT */
+  .search-box {
+    background: var(--card);
+    border: 1px solid #1e1d28;
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .search-box p { font-size: 0.78rem; color: var(--dim); margin-bottom: 1rem; line-height: 1.7; }
+  .search-row { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  input[type=text], input[type=number] {
+    background: #0d0c16;
+    border: 1px solid #2a2838;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.8rem;
+    width: 180px;
+    outline: none;
+    border-radius: 2px;
+  }
+  input:focus { border-color: var(--accent); }
+  #search-result {
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    min-height: 1.4rem;
+    color: var(--accent);
+  }
+
+  /* FUN FACTS */
+  .facts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .fact-card {
+    background: var(--card);
+    border: 1px solid #1e1d28;
+    border-radius: 4px;
+    padding: 1.2rem;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--dim);
+    transition: border-color 0.2s;
+  }
+  .fact-card:hover { border-color: var(--accent); }
+  .fact-card strong { color: var(--accent); display: block; margin-bottom: 0.3rem; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  footer {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--dim);
+    margin-top: 4rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div id="bg-digits"></div>
+
+<main>
+  <header>
+    <div class="pi-symbol">π</div>
+    <div class="date-tag">14. mart — Dan broja pi</div>
+    <h1>Beskonačan, iracionalan, sveprisutan</h1>
+    <p>Interaktivni projekat · IT Gimnazija · 2025</p>
+  </header>
+
+  <!-- DIGITS STRIP -->
+  <div class="digits-strip">
+    <div class="digits-strip-label">Prvih 200 decimala broja π</div>
+    <div id="digits-display"></div>
+  </div>
+
+  <!-- LEIBNIZ -->
+  <section>
+    <h2>Lajbnicova formula za π</h2>
+    <div class="approx-box">
+      <p>Jedna od najlepših formula u matematici — beskonačan zbir koji konvergira ka π/4. Otkrio je Gottfried Wilhelm Leibniz 1676. godine (i nezavisno Madhava još u 14. veku).</p>
+      <div class="formula">π/4 = 1 − 1/3 + 1/5 − 1/7 + 1/9 − ···</div>
+      <p>Pomijeraj klizač i gledaj kako aproksimacija postaje sve tačnija sa više članova.</p>
+      <div class="controls">
+        <span class="iter-label">Broj članova:</span>
+        <input type="range" id="leibniz-slider" min="1" max="5000" value="10" step="1">
+        <div>
+          <div class="pi-result" id="leibniz-result">π ≈ —</div>
+          <div class="error-display" id="leibniz-error"></div>
+        </div>
+      </div>
+      <div style="font-size:0.68rem; color:var(--dim); margin-top:0.8rem;" id="leibniz-n"></div>
+    </div>
+  </section>
+
+  <!-- MONTE CARLO -->
+  <section>
+    <h2>Monte Carlo metoda</h2>
+    <div class="approx-box" style="padding-bottom:1.5rem;">
+      <p style="font-size:0.78rem; color:var(--dim); line-height:1.8; margin-bottom:1rem;">
+        Nasumično bacamo tačke u kvadrat 1×1. Ako je tačka unutar četvrtine kruga (x²+y²≤1) — plava; ako nije — narandžasta. Udio plavih tačaka ≈ π/4.
+      </p>
+      <div class="mc-wrapper">
+        <canvas id="mc" width="240" height="240"></canvas>
+        <div class="mc-info">
+          <strong>Rezultat simulacije</strong>
+          <span class="mc-pi-val" id="mc-pi">—</span>
+          <div id="mc-stats"></div>
+          <br>
+          <div style="display:flex; gap:0.5rem; align-items:center; font-size:0.7rem; color:var(--dim); margin-bottom:0.3rem;">
+            <span style="width:10px;height:10px;background:var(--accent);display:inline-block;border-radius:50%;"></span> unutar kruga
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:center; font-size:0.7rem; color:var(--dim);">
+            <span style="width:10px;height:10px;background:var(--accent2);display:inline-block;border-radius:50%;"></span> van kruga
+          </div>
+          <button class="btn" id="mc-btn">▶ Pokreni</button>
+          <button class="btn" id="mc-reset" style="margin-left:0.3rem;">↺ Ponovo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMULAS -->
+  <section>
+    <h2>π kroz historiju — formule</h2>
+    <table class="formula-table">
+      <tr><th>Formula</th><th>Ko / Kada</th><th>Opis</th></tr>
+      <tr>
+        <td>π = C / d</td>
+        <td>Stari Egipćani, ~1650 p.n.e.</td>
+        <td>Definicija — omjer opsega i prečnika</td>
+      </tr>
+      <tr>
+        <td>π ≈ √10</td>
+        <td>Brahmagupta, 628.</td>
+        <td>Indijska aproksimacija (≈3.1623)</td>
+      </tr>
+      <tr>
+        <td>π/4 = Σ (−1)ⁿ/(2n+1)</td>
+        <td>Leibniz / Madhava</td>
+        <td>Trigonometrijski red, sporo konvergira</td>
+      </tr>
+      <tr>
+        <td>π²/6 = Σ 1/n²</td>
+        <td>Euler, 1734.</td>
+        <td>Baselski problem — veoma elegantno</td>
+      </tr>
+      <tr>
+        <td>2/π = √2/2 · √(2+√2)/2 · ···</td>
+        <td>Viète, 1593.</td>
+        <td>Prva tačna beskonačna formula za π</td>
+      </tr>
+      <tr>
+        <td>π/2 = ∏ (4n²)/(4n²−1)</td>
+        <td>Wallis, 1656.</td>
+        <td>Wallisov produkt</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- SEARCH -->
+  <section>
+    <h2>Pronađi redni broj cifre</h2>
+    <div class="search-box">
+      <p>Upiši broj (npr. tvoj datum rođenja, omiljeni broj...) i saznaj na kojoj poziciji se pojavljuje u decimalalnom razvoju π.</p>
+      <div class="search-row">
+        <input type="text" id="search-input" placeholder="npr. 314" maxlength="6">
+        <button class="btn" id="search-btn">Traži</button>
+      </div>
+      <div id="search-result"></div>
+    </div>
+  </section>
+
+  <!-- FUN FACTS -->
+  <section>
+    <h2>Zanimljivosti o π</h2>
+    <div class="facts-grid">
+      <div class="fact-card"><strong>Iracionalan</strong>Johann Lambert dokazao je 1768. da π nije razlomak — decimale nikad ne prestaju i ne ponavljaju se.</div>
+      <div class="fact-card"><strong>Transcendentan</strong>Ferdinand von Lindemann 1882. dokazao da π nije korijen ni jednog algebarskog polinoma — π nije konstruktibilan šestarom.</div>
+      <div class="fact-card"><strong>Rekord memorisanja</strong>Rajveer Meena 2015. recitovao je 70.000 decimala za ~10 sati. Zaslijepljenih očiju.</div>
+      <div class="fact-card"><strong>Rekord računanja</strong>2024: Jordan Ranous izračunao ~105 triliona decimala koristeći cloud server.</div>
+      <div class="fact-card"><strong>π u fizici</strong>Pojavljuje se u Coulombovom zakonu, Schrödingeru, Gaussovoj distribuciji... priroda voli π.</div>
+      <div class="fact-card"><strong>Dan π</strong>14. mart = 3/14 (američki format) = 3.14. Isti datum — Einsteinov rođendan.</div>
+    </div>
+  </section>
+
+  <footer>Dan broja π · 14. mart · IT GIMNAZIJA IV-2</footer>
+</main>
+
+<script>
+// === PI DIGITS (200) ===
+const PI_STR = "3.14159265358979323846264338327950288419716939937510" +
+               "58209749445923078164062862089986280348253421170679" +
+               "82148086513282306647093844609550582231725359408128" +
+               "48111745028410270193852110555964462294895493038196";
+
+// Render digits strip
+(function(){
+  const el = document.getElementById('digits-display');
+  let html = '';
+  for(let i=0; i<PI_STR.length; i++){
+    const c = PI_STR[i];
+    if(c === '.') { html += '<span style="color:var(--accent2)">.</span>'; continue; }
+    const n = parseInt(c);
+    if(n === 3 || n === 1 || n === 4) html += `<span class="hi">${c}</span>`;
+    else if(n === 1 || n === 5 || n === 9) html += `<span class="hi2">${c}</span>`;
+    else html += c;
+  }
+  el.innerHTML = html;
+})();
+
+// === BACKGROUND FLOATING DIGITS ===
+(function(){
+  const container = document.getElementById('bg-digits');
+  const digits = PI_STR.replace('.','').split('');
+  for(let i=0; i<40; i++){
+    const span = document.createElement('span');
+    span.className = 'bg-digit';
+    span.textContent = digits[Math.floor(Math.random()*digits.length)];
+    const left = Math.random()*100;
+    const dur  = 15 + Math.random()*30;
+    const delay= -Math.random()*dur;
+    const rot  = (Math.random()-0.5)*30 + 'deg';
+    span.style.cssText = `left:${left}%;--rot:${rot};animation-duration:${dur}s;animation-delay:${delay}s;`;
+    container.appendChild(span);
+  }
+})();
+
+// === LEIBNIZ ===
+(function(){
+  const slider = document.getElementById('leibniz-slider');
+  const result = document.getElementById('leibniz-result');
+  const errEl  = document.getElementById('leibniz-error');
+  const nEl    = document.getElementById('leibniz-n');
+
+  function calcLeibniz(n){
+    let sum = 0;
+    for(let k=0; k<n; k++) sum += (k%2===0?1:-1)/(2*k+1);
+    return 4*sum;
+  }
+
+  function update(){
+    const n = parseInt(slider.value);
+    const approx = calcLeibniz(n);
+    const error  = Math.abs(Math.PI - approx);
+    result.textContent = `π ≈ ${approx.toFixed(8)}`;
+    errEl.textContent  = `Greška: ${error.toExponential(3)}`;
+    nEl.textContent    = `Korišćeno ${n.toLocaleString()} članova niza`;
+  }
+  slider.addEventListener('input', update);
+  update();
+})();
+
+// === MONTE CARLO ===
+(function(){
+  const canvas = document.getElementById('mc');
+  const ctx    = canvas.getContext('2d');
+  const S = canvas.width;
+  let inside = 0, total = 0, running = false, raf = null;
+
+  function reset(){
+    inside = 0; total = 0;
+    ctx.clearRect(0,0,S,S);
+    // draw quarter circle arc guide
+    ctx.strokeStyle = 'rgba(91,196,245,0.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, S, S, -Math.PI/2, 0);
+    ctx.stroke();
+    document.getElementById('mc-pi').textContent = '—';
+    document.getElementById('mc-stats').textContent = '';
+  }
+
+  function step(n){
+    for(let i=0;i<n;i++){
+      const x=Math.random(), y=Math.random();
+      const inCircle = x*x+y*y<=1;
+      if(inCircle) inside++;
+      total++;
+      // draw dot
+      const px = x*S, py = (1-y)*S;
+      ctx.fillStyle = inCircle ? 'rgba(91,196,245,0.75)' : 'rgba(245,144,74,0.7)';
+      ctx.beginPath();
+      ctx.arc(px, py, 1.5, 0, Math.PI*2);
+      ctx.fill();
+    }
+    const piApprox = 4*inside/total;
+    document.getElementById('mc-pi').textContent = piApprox.toFixed(6);
+    document.getElementById('mc-stats').innerHTML =
+      `Unutar kruga: <b style="color:var(--accent)">${inside.toLocaleString()}</b><br>` +
+      `Ukupno tačaka: <b style="color:var(--text)">${total.toLocaleString()}</b>`;
+  }
+
+  function loop(){
+    if(!running) return;
+    const batch = total < 1000 ? 5 : total < 10000 ? 20 : 50;
+    step(batch);
+    if(total < 50000) raf = requestAnimationFrame(loop);
+    else { running=false; document.getElementById('mc-btn').textContent = '▶ Pokreni'; }
+  }
+
+  document.getElementById('mc-btn').addEventListener('click', function(){
+    if(running){ running=false; cancelAnimationFrame(raf); this.textContent='▶ Pokreni'; }
+    else { running=true; this.textContent='⏸ Pauza'; loop(); }
+  });
+  document.getElementById('mc-reset').addEventListener('click', function(){
+    running=false; cancelAnimationFrame(raf);
+    document.getElementById('mc-btn').textContent='▶ Pokreni';
+    reset();
+  });
+  reset();
+})();
+
+// === SEARCH IN PI ===
+(function(){
+  const piDigits = PI_STR.replace('.',''); // 200 cifara bez tačke
+  document.getElementById('search-btn').addEventListener('click', function(){
+    const q = document.getElementById('search-input').value.trim();
+    const el = document.getElementById('search-result');
+    if(!q || !/^\d+$/.test(q)){ el.textContent='Unesi samo cifre.'; return; }
+    const idx = piDigits.indexOf(q);
+    if(idx === -1){
+      el.innerHTML = `<span style="color:var(--accent2)">"${q}" nije pronađeno u prvih 200 decimala π.</span>`;
+    } else {
+      el.innerHTML = `"${q}" se pojavljuje na poziciji <b style="color:var(--accent)">${idx+1}</b> u razvoju broja π.`;
+    }
+  });
+  document.getElementById('search-input').addEventListener('keydown', function(e){
+    if(e.key==='Enter') document.getElementById('search-btn').click();
+  });
+})();
+</script>
+</body>
+</html>
